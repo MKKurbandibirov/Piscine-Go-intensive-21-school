@@ -16,21 +16,21 @@ func TestHandleWords(t *testing.T) {
 			args: args{
 				fileName: "../../test/empty.txt",
 			},
-			want: 1,
+			want: 0,
 		},
 		{
 			name: "Russian Case",
 			args: args{
 				fileName: "../../test/input1.txt",
 			},
-			want: 48,
+			want: 51,
 		},
 		{
 			name: "English Case",
 			args: args{
 				fileName: "../../test/input2.txt",
 			},
-			want: 126,
+			want: 133,
 		},
 	}
 	for _, tt := range tests {

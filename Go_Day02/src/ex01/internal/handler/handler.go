@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"bufio"
 	"day02/internal/domain"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -16,11 +16,13 @@ func HandleWords(fileName string) int {
 	if err != nil {
 		return -1
 	}
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return -1
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanWords)
+	var result int
+	for scanner.Scan() {
+		result++
 	}
-	return len(strings.Split(string(data), " "))
+	return result
 }
 
 func HandleLines(fileName string) int {
