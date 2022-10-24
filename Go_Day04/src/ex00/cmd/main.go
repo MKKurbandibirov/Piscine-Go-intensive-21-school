@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"day04/pkg/handler"
+	"day04/ex00/pkg/handler"
 	"log"
 	"net/http"
 	"os"

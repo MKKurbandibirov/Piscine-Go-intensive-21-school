@@ -1,7 +1,8 @@
 package handler
 
 import (
-	candies "day04"
+	candies "day04/ex00"
+	"day04/ex00/pkg/service"
 	"encoding/json"
 	"io"
 	"log"
@@ -20,9 +21,7 @@ func BuyCandyHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("couldn't unmarshal body")
 		return
 	}
-	_, err = io.WriteString(w, "Hello Client!")
-	if err != nil {
-		log.Println("couldn't send response")
-		return
+	if err := service.MakeResponse(w, candyReq); err != nil {
+		log.Println("couldn't create response")
 	}
 }

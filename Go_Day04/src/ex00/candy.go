@@ -1,4 +1,4 @@
-package candies
+package ex00
 
 type CandyRequest struct {
 	Money      int    `json:"money"`
@@ -9,6 +9,10 @@ type CandyRequest struct {
 type CandyResponse struct {
 	Change int    `json:"change"`
 	Thanks string `json:"thanks"`
+}
+
+type ErrorResponse struct {
+	Error string `json:"error"`
 }
 
 type Candy struct {
