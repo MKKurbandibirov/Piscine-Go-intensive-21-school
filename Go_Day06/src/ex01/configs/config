@@ -1,0 +1,9 @@
+host: "localhost"
+port: "8888"
+
+db:
+  host: "localhost"
+  port: "5432"
+  user: "<Your username>"
+  dbname: "<Your dbname>"
+  password: "<Your db password>"

@@ -1,0 +1,34 @@
+{{template "base" .}}
+
+{{define "title"}}Home page{{end}}
+
+{{define "main"}}
+    <h2>Last Thoughts</h2>
+    {{if .Thoughts}}
+    <table>
+    <tr>
+        <th>Title</th>
+        <th>Created</th>
+        <th>ID</th>
+    </tr>
+    {{range .Thoughts}}
+    <tr>
+        <td><a href='/thought?id={{.ID}}'>{{.Title}}</a></td>
+        <td>{{.Created.Format "2006-01-02"}}</td>
+        <td>#{{.ID}}</td>
+    </tr>
+    {{end}}
+    </table>
+    {{else}}
+        <p>There is nothing here ... yet!</p>
+    {{end}}
+
+<!--<h2>Create snippet</h2>-->
+<!--<form method="POST" action="/snippet/create">-->
+<!--<label>Title</label><br>-->
+<!--<input type="text" name="title" /><br><br>-->
+<!--<label>Content</label><br>-->
+<!--<input type="text" name="content" /><br><br>-->
+<!--<input type="submit" value="Create" />-->
+<!--</form>-->
+{{end}}

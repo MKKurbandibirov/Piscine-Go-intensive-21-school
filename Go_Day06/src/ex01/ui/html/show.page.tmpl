@@ -1,0 +1,18 @@
+{{template "base" .}}
+
+{{define "title"}}Thought #{{.Thought.ID}}{{end}}
+
+{{define "main"}}
+    {{with .Thoughts}}
+    <div class='thought'>
+        <div class='metadata'>
+            <strong>{{.Title}}</strong>
+            <span>#{{.ID}}</span>
+        </div>
+        <pre><code>{{.Content}}</code></pre>
+        <div class='metadata'>
+            <time>Created: {{.Created.Format "2006-01-02"}}</time>
+        </div>
+    </div>
+    {{end}}
+{{end}}
