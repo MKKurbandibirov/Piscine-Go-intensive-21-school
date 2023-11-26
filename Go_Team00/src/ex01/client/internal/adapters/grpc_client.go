@@ -3,6 +3,7 @@ package adapters
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"io"
@@ -10,9 +11,18 @@ import (
 )
 
 type Client struct {
+	log    *zap.Logger
+	values chan float64
+
 	conn   *grpc.ClientConn
-	values []*pb.StatisticValue
 	client pb.TransmitterClient
+}
+
+func NewClient(log *zap.Logger) *Client {
+	return &Client{
+		log:    log,
+		values: make(chan float64),
+	}
 }
 
 func (c *Client) Connect(addr string) error {
@@ -41,27 +51,24 @@ func (c *Client) GetStatistics(ctx context.Context) error {
 		return err
 	}
 
-	for {
-		msg, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
+	go func() {
+		for {
+			msg, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				//TODO logging
+				return
+			}
 
-		c.values = append(c.values, msg)
-	}
+			c.values <- msg.GetFrequency()
+		}
+	}()
 
 	return nil
 }
 
-func (c *Client) GetValues() []float64 {
-	values := make([]float64, 0, len(c.values))
-
-	for _, val := range c.values {
-		values = append(values, val.GetFrequency())
-	}
-
-	return values
+func (c *Client) GetValues() <-chan float64 {
+	return c.values
 }

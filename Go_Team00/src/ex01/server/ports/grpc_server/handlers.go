@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	sendInterval = 500 * time.Millisecond
+	sendInterval = 50 * time.Millisecond
 )
 
 func init() {
