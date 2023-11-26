@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "./generated";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+package transmitter;
+
+service Transmitter {
+	rpc GetStatistics(google.protobuf.Empty) returns (stream StatisticValue) {};
+}
+
+message StatisticValue {
+	string session_id = 1;
+	double frequency = 2;
+	google.protobuf.Timestamp current_time = 3;
+}
