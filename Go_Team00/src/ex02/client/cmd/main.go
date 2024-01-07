@@ -2,7 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"go.uber.org/zap"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"client/internal/adapters"
 	"client/internal/usecase"
@@ -11,15 +15,11 @@ import (
 	"server/logger"
 )
 
-func GetUseCase(log *zap.Logger, client *adapters.Client) *usecase.UseCase {
-	predictor := predict.NewPredictor(log, client, 100)
-	detector := anomaly_detect.NewDetector(log, client, 3)
-
-	return usecase.NewUseCase(predictor, detector)
-}
-
 func main() {
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 
 	log := logger.NewLogger()
 	client := adapters.NewClient(log)
@@ -29,7 +29,6 @@ func main() {
 			zap.Error(err),
 		)
 	}
-	defer client.Disconnect()
 
 	id, err := client.Hello(ctx)
 	if err != nil {
@@ -45,5 +44,35 @@ func main() {
 	}
 
 	uc := GetUseCase(log, client)
-	uc.Detect(uc.Predict())
+	go uc.Detect(uc.Predict())
+
+	GracefulShutdown(log, cancel, signals, client)
+}
+
+func GetUseCase(log *zap.Logger, client *adapters.Client) *usecase.UseCase {
+	predictor := predict.NewPredictor(log, client, 100)
+	detector := anomaly_detect.NewDetector(log, client, 3)
+
+	return usecase.NewUseCase(predictor, detector)
+}
+
+func GracefulShutdown(
+	log *zap.Logger,
+	cancel context.CancelFunc,
+	signals chan os.Signal,
+	client *adapters.Client,
+) {
+	<-signals
+	fmt.Println("<<< Client Shutdowned! >>>")
+
+	cancel()
+
+	if err := client.Disconnect(); err != nil {
+		log.Fatal("Error occurred while disconnecting client",
+			zap.Error(err),
+		)
+	}
+
+	return
+
 }

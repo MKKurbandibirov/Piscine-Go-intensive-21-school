@@ -63,22 +63,29 @@ func (c *Client) Hello(ctx context.Context) (*pb.SessionID, error) {
 func (c *Client) GetStatistics(ctx context.Context, id *pb.SessionID) error {
 	stream, err := c.client.GetStatistics(ctx, id)
 	if err != nil {
-		//TODO wrapping
 		return err
 	}
 
 	go func() {
 		for {
-			msg, err := stream.Recv()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				//TODO logging
+			select {
+			case <-ctx.Done():
 				return
-			}
+			default:
+				msg, err := stream.Recv()
+				if err == io.EOF {
+					return
+				}
+				if err != nil {
+					c.log.Error("Error while receiving message",
+						zap.Error(err),
+					)
 
-			c.values <- msg.GetFrequency()
+					return
+				}
+
+				c.values <- msg.GetFrequency()
+			}
 		}
 	}()
 
