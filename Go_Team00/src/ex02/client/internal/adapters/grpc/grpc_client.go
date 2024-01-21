@@ -27,11 +27,8 @@ func NewClient(log *zap.Logger) *Client {
 }
 
 func (c *Client) Connect(addr string) error {
-	credentials := grpc.WithTransportCredentials(insecure.NewCredentials())
-
-	conn, err := grpc.Dial(addr, credentials)
+	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		//TODO wrapping
 		return err
 	}
 

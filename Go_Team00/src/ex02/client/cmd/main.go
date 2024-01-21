@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"client/internal/adapters"
+	"client/internal/adapters/grpc"
 	"client/internal/usecase"
 	"client/internal/usecase/anomaly_detect"
 	"client/internal/usecase/predict"
@@ -23,7 +23,7 @@ func main() {
 
 	log := logger.NewLogger()
 	client := adapters.NewClient(log)
-	err := client.Connect("localhost:4000")
+	err := client.Connect("0.0.0.0:7777")
 	if err != nil {
 		log.Fatal("Error occurred while connection",
 			zap.Error(err),
@@ -72,7 +72,4 @@ func GracefulShutdown(
 			zap.Error(err),
 		)
 	}
-
-	return
-
 }

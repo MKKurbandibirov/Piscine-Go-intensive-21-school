@@ -11,7 +11,7 @@ import (
 )
 
 func ListenAndServe(log *zap.Logger, server *grpc.Server) error {
-	lis, err := net.Listen("tcp", "localhost:4000")
+	lis, err := net.Listen("tcp", "localhost:7777")
 	if err != nil {
 		return err
 	}
