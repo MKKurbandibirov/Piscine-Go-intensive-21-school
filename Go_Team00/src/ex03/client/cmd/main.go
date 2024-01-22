@@ -9,7 +9,9 @@ import (
 
 	"go.uber.org/zap"
 
+	"client/config"
 	adapters "client/internal/adapters/grpc"
+	"client/internal/adapters/postgres"
 	"client/internal/usecase"
 	"client/internal/usecase/anomaly_detect"
 	"client/internal/usecase/predict"
@@ -19,13 +21,39 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
+	log := logger.NewLogger()
+
+	cfg, err := config.DefaultConfigParser()
+	if err != nil {
+		log.Fatal("Error occurred while reading config",
+			zap.Error(err),
+		)
+	}
+
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 
-	log := logger.NewLogger()
-	client := adapters.NewClient(log)
-	err := client.Connect("0.0.0.0:7777")
+	dbComm, err := postgres.NewCommunicator(ctx, fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+		cfg.Postgres.User,
+		cfg.Postgres.Password,
+		cfg.Postgres.Host,
+		cfg.Postgres.Port,
+		cfg.Postgres.DBName,
+	))
 	if err != nil {
+		log.Fatal("Error occurred while connecting to DB",
+			zap.Error(err),
+		)
+	}
+
+	if err := dbComm.Ping(); err != nil {
+		log.Fatal("Error occurred while ping DB",
+			zap.Error(err),
+		)
+	}
+
+	client := adapters.NewClient(log)
+	if err := client.Connect(fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)); err != nil {
 		log.Fatal("Error occurred while connection",
 			zap.Error(err),
 		)
@@ -49,6 +77,8 @@ func main() {
 
 	GracefulShutdown(log, cancel, signals, client)
 }
+
+
 
 func GetUseCase(log *zap.Logger, client *adapters.Client) *usecase.UseCase {
 	predictor := predict.NewPredictor(log, client, 100)
