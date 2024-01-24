@@ -9,6 +9,8 @@ type Config struct {
 	Host     string         `json:"host"`
 	Port     string         `json:"port"`
 	Postgres PostgresConfig `json:"postgres"`
+	Max      int            `json:"max"`
+	K        int            `json:"k"`
 }
 
 type PostgresConfig struct {

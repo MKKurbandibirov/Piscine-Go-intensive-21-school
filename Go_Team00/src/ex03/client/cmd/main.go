@@ -72,7 +72,7 @@ func main() {
 		)
 	}
 
-	uc := GetUseCase(log, client)
+	uc := GetUseCase(log, cfg, client, dbComm)
 	go uc.Detect(uc.Predict())
 
 	GracefulShutdown(log, cancel, signals, client)
@@ -80,9 +80,9 @@ func main() {
 
 
 
-func GetUseCase(log *zap.Logger, client *adapters.Client) *usecase.UseCase {
-	predictor := predict.NewPredictor(log, client, 100)
-	detector := anomaly_detect.NewDetector(log, client, 3)
+func GetUseCase(log *zap.Logger, cfg *config.Config, client *adapters.Client, db *postgres.Communicator) *usecase.UseCase {
+	predictor := predict.NewPredictor(log, client, cfg.Max)
+	detector := anomaly_detect.NewDetector(log, client, db, float64(cfg.K))
 
 	return usecase.NewUseCase(predictor, detector)
 }

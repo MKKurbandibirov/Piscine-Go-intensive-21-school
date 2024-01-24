@@ -1,21 +1,34 @@
 package anomaly_detect
 
-import "go.uber.org/zap"
+import (
+	"client/internal/domain"
+	"time"
+
+	"go.uber.org/zap"
+)
 
 type ValuesGetter interface {
 	GetValues() <-chan float64
+	GetSessionID() string
+}
+
+type AnomalyStorer interface {
+	Store(aml *domain.Anomaly) error
 }
 
 type Detector struct {
-	log    *zap.Logger
+	log *zap.Logger
+	k   float64
+
 	getter ValuesGetter
-	k      float64
+	storer AnomalyStorer
 }
 
-func NewDetector(log *zap.Logger, getter ValuesGetter, k float64) *Detector {
+func NewDetector(log *zap.Logger, getter ValuesGetter, storer AnomalyStorer, k float64) *Detector {
 	return &Detector{
 		log:    log,
 		getter: getter,
+		storer: storer,
 		k:      k,
 	}
 }
@@ -31,6 +44,12 @@ func (d *Detector) Detect(mean, svd float64) {
 			d.log.Warn("Anomaly detected",
 				zap.Float64("Value", val),
 			)
+
+			d.storer.Store(&domain.Anomaly{
+				SessionID: d.getter.GetSessionID(),
+				Frequency: val,
+				Time:      time.Now(),
+			})
 		}
 	}
 }

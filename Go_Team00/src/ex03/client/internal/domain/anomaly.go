@@ -4,6 +4,6 @@ import "time"
 
 type Anomaly struct {
 	SessionID string
-	Freauency float64
+	Frequency float64
 	Time      time.Time
 }

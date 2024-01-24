@@ -12,6 +12,8 @@ import (
 )
 
 type Client struct {
+	id string
+
 	log    *zap.Logger
 	values chan float64
 
@@ -49,6 +51,7 @@ func (c *Client) Hello(ctx context.Context) (*pb.SessionID, error) {
 	if err != nil {
 		return nil, err
 	}
+	c.id = msg.SessionId.GetID()
 
 	c.log.Debug("Connected to server",
 		zap.String("SessionID", msg.SessionId.GetID()),
@@ -91,4 +94,8 @@ func (c *Client) GetStatistics(ctx context.Context, id *pb.SessionID) error {
 
 func (c *Client) GetValues() <-chan float64 {
 	return c.values
+}
+
+func (c *Client) GetSessionID() string {
+	return c.id
 }
